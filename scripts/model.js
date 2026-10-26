@@ -55,6 +55,7 @@ export function sameBlock(r1, c1, r2, c2) {
 /** Read the value at (row, col): a digit 1-9, or EMPTY (-1). */
 export function getCell(board, row, col) {
   // TODO: return the value stored at board[row][col]
+  return board[row][col]
 }
 
 /**
@@ -65,6 +66,10 @@ export function getCell(board, row, col) {
  */
 export function setCell(board, row, col, value) {
   // TODO: return a new 9x9 board with exactly one cell changed
+  return board.map((rowValues, r) => {
+    if (r !== row) return rowValues
+    return rowValues.map((cell, c) => (c === col ? value : cell))
+  })
 }
 
 /**
@@ -77,11 +82,32 @@ export function setCell(board, row, col, value) {
  */
 export function findConflicts(board, row, col) {
   // TODO: return an array of [row, col] pairs that conflict with (row, col)
+  const value = board[row][col]
+  const conflicts = []
+  if (value === EMPTY) return conflicts
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (r === row && c === col) continue
+      if (board[r][c] !== value) continue
+      if (sameRow(row, col, r, c) || sameColumn(row, col, r, c) || sameBlock(row, col, r, c)) {
+        conflicts.push([r, c])
+      }
+    }
+  }
+  return conflicts
 }
 
 /** True when every cell is filled (no EMPTY) and nothing conflicts. */
 export function isComplete(board) {
   // TODO: false if any cell is EMPTY or has conflicts; otherwise true
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c] === EMPTY) return false
+      if (findConflicts(board, r, c).length > 0) return false
+    }
+  }
+  return true
 }
 
 // ---------------------------------------------------------------------
@@ -93,15 +119,23 @@ export function isComplete(board) {
 export function formatDuration(durationSeconds) {
   // TODO: whole minutes, then zero-padded seconds.
   // Hint: String(n).padStart(2, '0')
+  const minutes = Math.floor(durationSeconds / 60)
+  const seconds = durationSeconds % 60
+  return minutes + ':' + String(seconds).padStart(2, '0')
 }
 
 /** Format a Date as "YYYY/MM/DD" (e.g. "2021/03/02"). */
 export function formatDate(date) {
   // TODO: getFullYear(), getMonth() + 1, getDate() - month/day zero-padded
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return year + '/' + month + '/' + day
 }
 
 /** A NEW array of scores sorted fastest-first, without mutating the input. */
 export function sortScores(scores) {
   // TODO: copy the array, then sort by durationSeconds ascending.
   // Hint: [...scores] makes a copy so the original is left untouched.
+  return [...scores].sort((a, b) => a.durationSeconds - b.durationSeconds)
 }
